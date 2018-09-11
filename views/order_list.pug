@@ -1,0 +1,36 @@
+extends layout
+
+block content
+
+    h3=title
+
+    p
+
+    <!-- Data table-->
+
+    table#pickle.display
+        thead
+            tr
+                th Ордер
+                th Номер EDI заказа
+                th Клиент
+                th Адрес доставки
+                th Дата доставки
+                th Дата создания
+                th Действия
+        tbody
+            each order in orders_list
+                tr
+                    td #{order.orderId}
+                    td #{order.ediOrder}
+                    td #{order.soldTo.name}
+                    td #{order.deliveryAddress}
+                    td #{order.shipDate.toLocaleString('uk-UA', { year: 'numeric', month: 'numeric', day: 'numeric' })}
+                    td #{order.created_at.toLocaleString('uk-UA')}
+                    td
+                        div.dropdown
+                            a(href='#' data-toggle='dropdown').dropdown-toggle Действия
+                            div.dropdown-menu
+                                a(href='../data/order/' + order._id).dropdown-item Детали
+                                a(href='../data/order/' + order._id + '/archive').dropdown-item Исходный заказ
+

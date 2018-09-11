@@ -1,0 +1,34 @@
+extends layout
+
+block content
+
+    p
+    h5 Заказ: #{title}
+    h5 Дата заказа: #{header['ORDER']['DATE'][0]}
+    h5 GLN покупателя: #{header['ORDER']['HEAD'][0]['BUYER'][0]}
+    p
+    <!-- Data table-->
+
+    table#pickle.display
+        thead
+            tr
+                th #
+                th Item Number
+                th Description
+                th Customer ProductId
+                th Quantity
+                th Price
+                th Price with VAT
+        tbody
+            each orderLine in details
+                tr
+                    td #{orderLine['POSITIONNUMBER'][0]}
+                    td #{orderLine['PRODUCTIDSUPPLIER'][0]}
+                    td #{orderLine['CHARACTERISTIC'][0]['DESCRIPTION'][0]}
+                    td #{orderLine['PRODUCTIDBUYER'][0]}
+                    td #{orderLine['ORDEREDQUANTITY'][0]}
+                    td #{orderLine['ORDERPRICE'][0]}
+                    td #{orderLine['PRICEWITHVAT'][0]}
+
+    p
+    a(href='../createOrder/' + orderId).btn.btn-success.btn-sm Create Order<br>

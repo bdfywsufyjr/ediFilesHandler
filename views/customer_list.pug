@@ -1,0 +1,60 @@
+extends layout
+
+block content
+
+    h3=title
+
+    <!-- Data table-->
+
+    table#pickle.display
+        thead
+            tr
+                th Клиент
+                th Код JDE
+                th Код GLN
+                th Логин
+                th Пароль
+                th Действия
+
+        tbody
+
+            each customer in customers_list
+
+                tr
+                    td #{customer.name}
+                    td #{customer.jdeId}
+                    td #{customer.gln}
+                    td #{customer.login}
+                    td #{customer.password}
+                    td
+                        div.dropdown
+                            a(href='#' data-toggle='dropdown').dropdown-toggle Действия
+                            div.dropdown-menu
+                                a(href='../data/customer/' + customer._id + '/update').dropdown-item Детали
+                                a(href='#' class='next' name='delete' params={id: customer._id, customer: customer.name }).dropdown-item Удалить
+
+    p
+    a(href='../data/customer/create').btn.btn-success.btn-sm Новый клиент<br>
+    
+    script.
+        $(document).ready(function () {
+            $('a[class^="next"]').click(function () {
+                var data = $.parseJSON($(this).attr("params"));
+                var uri = "http://localhost:3000/data/customer/" + data.id + "/delete";
+                console.log(uri);
+                $.ajax({
+                    url: uri,
+                    beforeSend: function () {
+
+                        return confirm('Вы уверены, что хотите удалить клиента ' + data.customer + '?');
+                    },
+                    success: function (data) {
+                        if (data.status == '200') {
+                            window.location.replace("http://localhost:3000/data/customer/");
+                        } else {
+                            alert('Ошибка!');
+                        }
+                    }
+                });
+            })
+        });

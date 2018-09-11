@@ -1,0 +1,50 @@
+extends layout
+
+block content
+
+    h1=title
+
+    <!-- Search input -->
+
+    input(id='myInput' type='text' placeholder='Search').form-control
+
+    p
+
+    <!-- Data table-->
+
+    table.table.table-hover.table-bordered
+
+        thead
+
+            tr
+
+                th JDE Id
+
+                th GLN
+
+                th Address
+
+                th Action
+
+            each shipTo in customerShipTo_list
+
+                tbody(id='myTable')
+
+                    tr
+
+                        td #{shipTo.jdeId}
+
+                        td #{shipTo.gln}
+
+                        td #{shipTo.address}
+
+                        td
+                            div.dropdown
+                                a(href='#' data-toggle='dropdown').dropdown-toggle Action
+                                div.dropdown-menu
+                                    a(href='../' + customer_id + '/shipto/' + shipTo._id + '/update').dropdown-item Edit
+                                    a(href='../data/customer/shipto/' + shipTo._id + '/delete').dropdown-item Delete
+
+    p
+
+    a(href='../' + customer_id + '/shipto/create').btn.btn-success.btn-sm Add ShipTo<br>

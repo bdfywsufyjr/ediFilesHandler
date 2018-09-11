@@ -1,0 +1,30 @@
+extends layout
+
+block content
+    h3 #{title}
+
+    form(method='POST' action='')
+        div.form-group
+            label(for='folder') Folder:
+            input#folder.form-control(type='text', placeholder='Folder path' name='folder' value=(undefined === settings ? '' : settings.folder))
+            p
+            label(for='login') Login:
+            input#login.form-control(type='text', placeholder='Login' name='login' value=(undefined === settings ? '' : settings.login))
+            p
+            label(for='password') Password:
+            input#password.form-control(type='text', placeholder='Password' name='password' value=(undefined === settings ? '' : settings.password))
+            p
+            label(for='mode') Mode:
+            select#mode.form-control(name='mode')
+                option(selected=(undefined === settings ? true : (settings.mode == 'Auto' ? false : true))) Manual
+                option(selected=(settings.mode == 'Auto' ? true : false)) Auto
+            p
+            label(for='email') Email:
+            input#email.form-control(type='text', placeholder='Email' name='email' value=(undefined === settings ? '' : settings.email))
+            p
+        button.btn.btn-primary(type='submit') Submit
+
+    if errors
+        ul
+            for error in errors
+                li!= error.msg

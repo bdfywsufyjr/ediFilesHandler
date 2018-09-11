@@ -1,0 +1,66 @@
+extends layout
+
+block content
+
+    h1=title
+
+    <!-- Search input -->
+
+    input(id='myInput' type='text' placeholder='Search').form-control
+
+    p
+
+    <!-- Data table-->
+
+    table.table.table-hover.table-bordered
+
+        thead
+
+            tr
+
+                th Order line
+
+                th Product Id
+
+                th Product Id Buyer
+
+                th Description
+
+                th Quantity
+
+                th Price
+
+                th VAT
+
+                th Price with VAT
+
+                th Action
+
+            each orderLine in archiveOrder_detail
+
+                tbody(id='myTable')
+
+                    tr
+
+                        td #{orderLine.positionNumber}
+
+                        td #{orderLine.productId}
+
+                        td #{orderLine.productIdBuyer}
+
+                        td #{orderLine.description}
+
+                        td #{orderLine.orderedQuantity}
+
+                        td #{orderLine.price}
+
+                        td #{orderLine.vat}
+
+                        td #{orderLine.priceWithVat}
+
+                        td
+                            div.dropdown
+                                a(href='#' data-toggle='dropdown').dropdown-toggle Action
+                                div.dropdown-menu
+                                    a(href='../processedOrder/').dropdown-item View JDE order
+                                    a(href='#').dropdown-item Delete

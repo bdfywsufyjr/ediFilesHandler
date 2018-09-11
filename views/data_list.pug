@@ -1,0 +1,80 @@
+extends layout
+
+block content
+
+    h3=title
+
+    p
+
+    <!-- Data table-->
+
+    table#pickle.display
+        thead
+            tr
+                th Клиент
+                th Номер заказа
+                th Дата заказа
+                th Дата доставки
+                th Адрес доставки
+                th Действия
+        tbody
+            each order in result
+                - var customer =  order['CUSTOMER'];
+                - var deliveryPlase = order['SHIPTO'];
+                tr
+                    td #{order['CUSTOMER']}
+                    td #{order['ORDER'].NUMBER}
+                    td #{order['ORDER'].DATE}
+                    td #{order['ORDER'].DELIVERYDATE}
+                    td #{order['SHIPTO']}
+                    td
+                        div.dropdown
+                            a(href='#' data-toggle='dropdown').dropdown-toggle Action
+                            div.dropdown-menu
+                                //a(href='../data/order/create/' + order['ORDER'].NUMBER).dropdown-item Create Order
+                                - if (customer == 'undefined' || deliveryPlase == 'undefined')
+                                    a(href='#' class='disabled' name='submit' params={order: order['ORDER'].NUMBER[0] }).dropdown-item Создать заказ
+                                - else
+                                    a(href='#' class='next' name='submit' params={order: order['ORDER'].NUMBER[0] }).dropdown-item Создать заказ
+                                a(href='../data/detail/' + order['ORDER'].NUMBER).dropdown-item Детали
+
+
+    script.
+        $(document).ready(function () {
+            $('a[class^="next"]').click(function () {
+                var data = $.parseJSON($(this).attr("params"));
+                var uri = "http://localhost:3000/data/order/create/" + data.order;
+                console.log(uri);
+                $.ajax({
+                    url: uri,
+                    beforeSend: function () {
+                        $.blockUI({
+                            css: {
+                                border: 'none',
+                                padding: '15px',
+                                backgroundColor: '#000',
+                                '-webkit-border-radius': '10px',
+                                '-moz-border-radius': '10px',
+                                opacity: .5,
+                                color: '#fff'
+                            }
+                        });
+
+                    },
+                    success: function (data) {
+                        $.unblockUI({
+                            onUnblock: function(){
+                                if (data.status == 'success') {
+                                    window.location.replace("http://localhost:3000/data/order/" + data.id);
+                                } else {
+                                    alert('Ошибка! Заказ не создан. ' + data.message);
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
+    div(class='ajax-loader')
+        img(src='https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif' class='img-responsive')

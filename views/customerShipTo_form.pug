@@ -1,0 +1,25 @@
+extends layout
+
+block content
+    p
+    h4 #{title}
+    p
+
+    form(method='POST' action='')
+        div.form-group
+            input#customerId.form-control(type='hidden', name='id' value=customer)
+            label(for='jdeId') JDE Id:
+            input#jdeId.form-control(type='text', placeholder='ShipTo JDE Id' name='jdeId' value=(undefined === shipTo ? '' : shipTo.jdeId))
+            p
+            label(for='gln') GLN:
+            input#gln.form-control(type='text', placeholder='ShipTo GLN' name='gln' value=(undefined === shipTo ? '' : shipTo.gln))
+            p
+            label(for='address') Address:
+            input#address.form-control(type='text', placeholder='ShipTo address' name='address' value=(undefined === shipTo ? '' : shipTo.address))
+            p
+        button.btn.btn-primary(type='submit') Submit
+
+    if errors
+        ul
+            for error in errors
+                li!= error.msg

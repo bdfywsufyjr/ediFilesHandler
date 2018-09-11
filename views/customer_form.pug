@@ -1,0 +1,159 @@
+extends layout
+
+block content
+
+    p
+    h5=title
+
+    form(method='POST' action='')
+        div.form-group
+            input#customerId.form-control(type='hidden', name='customerId' value=(undefined === customer ? '' : customer._id))
+            label(for='jdeId') JDE код:
+            input#jdeId.form-control(type='text', placeholder='Код JDE клиента' name='jdeId' value=(undefined === customer ? '' : customer.jdeId))
+            p
+            label(for='name') Имя:
+            input#name.form-control(type='text', placeholder='Название клиента' name='name' value=(undefined === customer ? '' : customer.name))
+            p
+            label(for='gln') GLN:
+            input#gln.form-control(type='text', placeholder='GLN код клиента' name='gln' value=(undefined === customer ? '' : customer.gln))
+            p
+            label(for='login') Логин:
+            input#login.form-control(type='text', placeholder='API логин' name='login' value=(undefined === customer ? '' : customer.login))
+            p
+            label(for='password') Пароль:
+            input#password.form-control(type='text', placeholder='API пароль' name='password' value=(undefined === customer ? '' : customer.password))
+            p
+
+            p
+
+            h5 Адреса доставки
+
+            table#pick.display
+                thead
+                    tr
+                        th(width='15%') JDE код
+                        th(width='25%') GLN
+                        th(width='55%') Адрес
+                        th(width='5%') Действия
+
+            table#newRow.display(style='display:none')
+                tbody
+                    tr
+                        td
+                            input.form-control(type='text' id='sTjdeId' name='sTjdeId')
+                        td
+                            input.form-control(type='text' id='sTgln' name='sTgln')
+                        td
+                            input.form-control(type='text' id='sTaddress' name='sTaddress')
+                        td(class='dt-center')
+                            i.fa.fa-minus-square.fa-lg(aria-hidden='true')
+
+            p
+            button.btn.btn-primary(type='submit') Подтвердить
+
+
+    script.
+        $(document).ready(function () {
+
+            var table;
+
+            $("#pick").on("mousedown", "td .fa.fa-minus-square", function (e) {
+                table.row($(this).closest("tr")).remove().draw();
+            })
+
+            $('#pick').css('border-bottom', 'none');
+
+            table = $('#pick').DataTable({
+                paging: false,
+                ordering: false,
+                searching: false,
+                serverSide: false,
+                info: false,
+                dom: 'Bfrtip',
+                buttons: [
+                    {
+                        text: ' + Новый адрес',
+                        action: function () {
+                            var rowHtml = $("#newRow").find("tr")[0].outerHTML
+                            console.log(rowHtml);
+                            table.row.add($(rowHtml)).draw();
+                        }
+                    }
+                ]
+            });
+
+            table.buttons().container()
+                .insertBefore('#pick');
+
+            if (document.getElementById('customerId').value) {
+
+                table.destroy();
+
+                var url = '/data/customer/' + document.getElementById('customerId').value + '/shipTo';
+
+                table = $('#pick').DataTable({
+                    paging: false,
+                    ordering: false,
+                    searching: false,
+                    serverSide: false,
+                    info: false,
+                    dom: 'Bfrtip',
+                    buttons: [
+                        {
+                            text: ' + Новый адрес',
+                            action: function () {
+                                var rowHtml = $("#newRow").find("tr")[0].outerHTML
+                                console.log(rowHtml);
+                                table.row.add($(rowHtml)).draw();
+                            }
+                        }
+                    ],
+                    ajax: {
+                        url: url,
+                        dataSrc: 'shipTo'
+                    },
+                    columns: [
+                        {
+                            'render': function (data, type, row) {
+                                return '<input class="form-control" id="sTjdeId" name="sTjdeId" type="text" value="' + (undefined === row['jdeId'] ? '' : row['jdeId']) + '">';
+                            },
+                            'width': '15%',
+                            'targets': 0
+                        },
+                        {
+                            'render': function (data, type, row) {
+                                return '<input class="form-control" id="sTgln" name="sTgln" type="text" value="' + (undefined === row['gln'] ? '' : row['gln']) + '">';
+                            },
+                            'width': '25%',
+                            'targets': 1
+                        },
+                        {
+                            'render': function (data, type, row) {
+                                return '<input class="form-control" id="sTaddress" name="sTaddress" type="text" value="' + (undefined === row['address'] ? '' : row['address']) + '">';
+                            },
+                            'width': '55%',
+                            'targets': 2
+                        },
+                        {
+                            'defaultContent': '<i class="fa fa-minus-square fa-lg" aria-hidden="true"></i>',
+                            'className': 'dt-center',
+                            'width': '5%',
+                            'targets': 3
+                        }
+                    ]
+                });
+            }
+
+            $('#addRow').on('click', function () {
+                var rowHtml = $("#newRow").find("tr")[0].outerHTML
+                console.log(rowHtml);
+                table.row.add($(rowHtml)).draw();
+            });
+
+        });
+
+    if errors
+        ul
+            for error in errors
+                li!= error.msg
+
