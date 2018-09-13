@@ -29,9 +29,8 @@ block content
                     td #{order['SHIPTO']}
                     td
                         div.dropdown
-                            a(href='#' data-toggle='dropdown').dropdown-toggle Action
+                            a(href='#' data-toggle='dropdown').dropdown-toggle Действия
                             div.dropdown-menu
-                                //a(href='../data/order/create/' + order['ORDER'].NUMBER).dropdown-item Create Order
                                 - if (customer == 'undefined' || deliveryPlase == 'undefined')
                                     a(href='#' class='disabled' name='submit' params={order: order['ORDER'].NUMBER[0] }).dropdown-item Создать заказ
                                 - else

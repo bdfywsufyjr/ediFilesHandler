@@ -1,12 +1,10 @@
 extends layout
 
 block content
-
-    h3=title
-
-    p Заказ: #{order.orderId}
-    p Первичный заказ: #{order.ediOrder}
-    p Клиент: #{order.soldTo.name}
+    p
+    h6 Заказ: SP #{order.orderId}
+    h6 Первичный заказ: #{order.ediOrder}
+    h6 Клиент: #{order.soldTo.name}
 
     <!-- Data table-->
 
@@ -20,7 +18,6 @@ block content
                 th Заказано
                 th Подтверждено
                 th Цена
-                th Действия
         tbody
             each orderLine in order.orderDetails
                 tr
@@ -29,9 +26,3 @@ block content
                     td #{orderLine.quantityRequested}
                     td #{orderLine.quantityShipped}
                     td #{orderLine.price}
-                    td
-                        div.dropdown
-                            a(href='#' data-toggle='dropdown').dropdown-toggle Действия
-                            div.dropdown-menu
-                                a(href='../archive/detail/' + order.ediOrder).dropdown-item Первичный заказ
-                                a(href='#').dropdown-item Удалить

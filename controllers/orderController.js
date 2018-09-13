@@ -48,6 +48,28 @@ function readSourceFolder(archive, callback) {
     })
 }
 
+function readDirectory(archive) {
+    return new Promise( (resolve, reject) => {
+        customerController.getCustomersSettingsV2.then( settings => {
+             var folder = archive == false ? settings[0].folder : settings[0].folder + '/archive/';
+
+             if (folder) {
+                 readFolder(folder, '.xml')
+                     .then(allContents => {
+                         var results = [];
+
+                         allContents.forEach(function (item) {
+                             parser.parseString(item[1], function (err, result) {
+                                 results.push(Object.assign(result, {"FILENAME": item[0]}));
+                             })
+                         });
+                         callback(null, results);
+                     }).catch( error => callback(error));
+             }
+        })
+    })
+};
+
 // Prepare data for JDE order request
 
 function findFileByOrderNumber(orderNumber, callback){
@@ -288,7 +310,7 @@ exports.file_detail = function(req, res) {
     });
 };
 
-// Display list of all Archived Orders (processed orders).
+// Display list of all Archived Orders (already processed orders).
 exports.order_list = function(req, res) {
     Order.find({})
         .populate('soldTo')
@@ -315,7 +337,7 @@ exports.order_list = function(req, res) {
         });
 };
 
-// Display detail page for a specific archive order.
+// Display detail page for a specific archive order (already processed order).
 exports.order_detail = function(req, res) {
     Order.findById(req.params.id)
         .populate('soldTo')
@@ -325,12 +347,11 @@ exports.order_detail = function(req, res) {
                 return;
             }
             //Successful, so render
-            res.render('order_detail', {order: order});
+            res.render('order_detail', { title: 'Заказ', order: order});
         });
 };
 
 // Display detail page for a specific file in archive folder.
-
 exports.archive_file_detail = function(req, res) {
 
     readSourceFolder(true, function (err, results) {
@@ -362,7 +383,7 @@ exports.order_create_get = function(req, res) {
             return;
         }
 
-        settingsController.getGlobalSettings(function (data) {
+        settingsController.getGlobalSettings(function (err, data) {
             var folder = data[0].folder;
 
             if (folder) {
