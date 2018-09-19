@@ -37,7 +37,7 @@ exports.getCustomersSettings = function(content, callback) {
         });
 };
 
-exports.getCustomersSettingsV2 = (content) => {
+exports.checkBuyers = (content) => {
 
     return new Promise( (resolve, reject) => {
         Customer.find({

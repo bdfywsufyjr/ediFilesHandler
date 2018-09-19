@@ -50,7 +50,7 @@ function readSourceFolder(archive, callback) {
 
 function readDirectory(archive) {
     return new Promise( (resolve, reject) => {
-        customerController.getCustomersSettingsV2.then( settings => {
+        customerController.checkBuyers.then(settings => {
              var folder = archive == false ? settings[0].folder : settings[0].folder + '/archive/';
 
              if (folder) {
@@ -212,19 +212,10 @@ exports.autoModeProcess = () => {
            return r;
        }, []);
 
-       customerController.getCustomersSettingsV2(buyers)
+       customerController.checkBuyers(buyers)
            .then( rest => {
-               var result = rest.reduce(function (r, o1) {
-                   var f = orders.find(function (o2) {
-                       return o1.gln == o2['ORDER']['HEAD'][0]['BUYER']
-                   });
 
-                   if (f) {
-                       r.push(f);
-                   }
-
-                   return r;
-               }, []);
+               var result = orders.filter(o1 => rest.find(o2 => o1['ORDER']['HEAD'][0]['BUYER'] == o2.gln));
 
                result.forEach(function (order) {
 
@@ -233,16 +224,14 @@ exports.autoModeProcess = () => {
                    jdeOrderCreateRequest(req, function (err, result) {
 
                        if (err) {
-                           console.log(err.message);
+                           console.log('Order: ' + order['ORDER'].NUMBER + ' Error: ' + err.message);
+                       } else {
+                           settingsController.getGlobalSettings(function (err, data) {
+                               var folder = data[0].folder;
 
-                           return
+                               moveFile(folder + result.fileName, folder + '/archive/', 'SP_' + result.orderId + '.xml');
+                           })
                        }
-
-                       settingsController.getGlobalSettings(function (err, data) {
-                           var folder = data[0].folder;
-
-                           moveFile(folder + '/' + result.fileName, folder + '/archive/', 'SP_' + result.orderId + '.xml');
-                       })
                    });
                })
            })
@@ -387,7 +376,7 @@ exports.order_create_get = function(req, res) {
             var folder = data[0].folder;
 
             if (folder) {
-                moveFile(folder + '/' + result.fileName, folder + '/archive/', 'SP_' + result.orderId + '.xml');
+                moveFile(folder + result.fileName, folder + '/archive/', 'SP_' + result.orderId + '.xml');
             }
 
             res.json({'status': 'success', 'message': '', 'id': result._id});

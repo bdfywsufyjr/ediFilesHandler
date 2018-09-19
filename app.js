@@ -1,8 +1,8 @@
-require('dotenv').config();
+var path = require('path');
+require('dotenv').config({path: path.join(__dirname, ".env")});
 
 var createError = require('http-errors');
 var express = require('express');
-var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
@@ -14,7 +14,10 @@ var app = express();
 
 //Set up mongoose connection
 var mongoose = require('mongoose');
-var mongoDB = 'mongodb://admin:qwweer55@ds020168.mlab.com:20168/elkoedifileshandler';
+var dbUser = process.env.DB_USER;
+var dbPassword = process.env.DB_PASSWORD;
+var dbHost = process.env.DB_HOST
+var mongoDB = 'mongodb://'+dbUser+':'+dbPassword+'@'+dbHost;
 mongoose.connect(mongoDB, { useNewUrlParser: true });
 mongoose.Promise = global.Promise;
 var db = mongoose.connection;

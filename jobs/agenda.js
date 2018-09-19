@@ -1,12 +1,11 @@
 const Agenda = require('agenda');
 var mongoose = require('mongoose');
 
-//const mongoConnectionString = 'mongodb://admin:qwweer55@ds020168.mlab.com:20168/elkoedifileshandler';
-//let agenda = new Agenda({db: {address: mongoConnectionString, collection: 'jobs'}});
-//var jobs = mongoose.connection.collection('jobs');
-//let agenda = new Agenda().mongo(jobs);
-
 var agenda = new Agenda();
+
+mongoose.connection.on('error', () => {
+    console.log('MongoDB connection error');
+});
 
 mongoose.connection.on('connected', () => {
     agenda.mongo(mongoose.connection.collection('jobs').conn.db, 'jobs');

@@ -32,9 +32,9 @@ block content
                             a(href='#' data-toggle='dropdown').dropdown-toggle Действия
                             div.dropdown-menu
                                 - if (customer == 'undefined' || deliveryPlase == 'undefined')
-                                    a(href='#' class='disabled' name='submit' params={order: order['ORDER'].NUMBER[0] }).dropdown-item Создать заказ
+                                a(href='#' class='disabled' name='submit' params={order: order['ORDER'].NUMBER[0] }).dropdown-item Создать заказ
                                 - else
-                                    a(href='#' class='next' name='submit' params={order: order['ORDER'].NUMBER[0] }).dropdown-item Создать заказ
+                                a(href='#' class='next' name='submit' params={order: order['ORDER'].NUMBER[0] }).dropdown-item Создать заказ
                                 a(href='../data/detail/' + order['ORDER'].NUMBER).dropdown-item Детали
 
 
@@ -42,7 +42,7 @@ block content
         $(document).ready(function () {
             $('a[class^="next"]').click(function () {
                 var data = $.parseJSON($(this).attr("params"));
-                var uri = "http://localhost:3000/data/order/create/" + data.order;
+                var uri = "../data/order/create/" + data.order;
                 console.log(uri);
                 $.ajax({
                     url: uri,
@@ -64,7 +64,7 @@ block content
                         $.unblockUI({
                             onUnblock: function(){
                                 if (data.status == 'success') {
-                                    window.location.replace("http://localhost:3000/data/order/" + data.id);
+                                    window.location.replace("../data/order/" + data.id);
                                 } else {
                                     alert('Ошибка! Заказ не создан. ' + data.message);
                                 }
