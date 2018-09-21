@@ -48,28 +48,6 @@ function readSourceFolder(archive, callback) {
     })
 }
 
-function readDirectory(archive) {
-    return new Promise( (resolve, reject) => {
-        customerController.checkBuyers.then(settings => {
-             var folder = archive == false ? settings[0].folder : settings[0].folder + '/archive/';
-
-             if (folder) {
-                 readFolder(folder, '.xml')
-                     .then(allContents => {
-                         var results = [];
-
-                         allContents.forEach(function (item) {
-                             parser.parseString(item[1], function (err, result) {
-                                 results.push(Object.assign(result, {"FILENAME": item[0]}));
-                             })
-                         });
-                         callback(null, results);
-                     }).catch( error => callback(error));
-             }
-        })
-    })
-};
-
 // Prepare data for JDE order request
 
 function findFileByOrderNumber(orderNumber, callback){
@@ -218,11 +196,8 @@ exports.autoModeProcess = () => {
                var result = orders.filter(o1 => rest.find(o2 => o1['ORDER']['HEAD'][0]['BUYER'] == o2.gln));
 
                result.forEach(function (order) {
-
                    var req = {'params': {'id': order['ORDER'].NUMBER}};
-
                    jdeOrderCreateRequest(req, function (err, result) {
-
                        if (err) {
                            console.log('Order: ' + order['ORDER'].NUMBER + ' Error: ' + err.message);
                        } else {
@@ -262,8 +237,8 @@ exports.index = function (req, res) {
 
         customerController.getCustomersSettings(buyers, function (rest) {
 
-            var result = orders.reduce(function(r, o1) {
-                var f = rest.find( function (o2) {
+            var result = orders.reduce(function (r, o1) {
+                var f = rest.find(function (o2) {
 
                     return o1['ORDER']['HEAD'][0]['BUYER'] == o2.gln
                 });
@@ -283,7 +258,7 @@ exports.index = function (req, res) {
                 return r;
             }, []);
 
-            res.render('data_list', { title:'Список заказов', result: result});
+            res.render('data_list', {title: 'Список заказов', result: result});
         });
     });
 };
@@ -382,29 +357,4 @@ exports.order_create_get = function(req, res) {
             res.json({'status': 'success', 'message': '', 'id': result._id});
         })
     });
-};
-
-// Handle Order create on POST.
-exports.order_create_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Order create POST');
-};
-
-// Display Order delete form on GET.
-exports.order_delete_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Order delete GET');
-};
-
-// Handle Order delete on POST.
-exports.order_delete_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Order delete POST');
-};
-
-// Display Order update form on GET.
-exports.order_update_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Order update GET');
-};
-
-// Handle Order update on POST.
-exports.order_update_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Order update POST');
 };
