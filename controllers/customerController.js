@@ -85,7 +85,7 @@ exports.customer_create_post = function(req, res) {
             else {
                 customer.save(function (err) {
                     if (err) { console.log(err); }
-                    // Customer saved. Redirect to genre detail page.
+                    // Customer saved. Redirect to detail page.
                     res.redirect(customer.url);
                 });
             }

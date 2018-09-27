@@ -5,6 +5,7 @@ var router                      = express.Router();
 var settings_controller         = require('../controllers/settingsController');
 var customer_controller         = require('../controllers/customerController');
 var order_controller            = require('../controllers/orderController');
+var error_controller            = require('../controllers/errorController');
 
 /// ROUTES ///
 
@@ -30,7 +31,7 @@ router.get('/settings/global', settings_controller.getGlobalSettings);
 // GET request for settings creating.
 router.get('/settings/create', settings_controller.globalSettings_create_get);
 
-// GET request for settings creating.
+// POST request for settings creating.
 router.post('/settings/create', settings_controller.globalSettings_create_post);
 
 // GET global settings update
@@ -47,21 +48,6 @@ router.get('/settings/:id/delete', settings_controller.globalSettings_delete_get
 // GET request for creating Order.
 router.get('/order/create/:id', order_controller.order_create_get);
 
-// POST request for creating Order.
-router.post('/order/create', order_controller.order_create_post);
-
-// GET request to delete Order.
-router.get('/order/:id/delete', order_controller.order_delete_get);
-
-// POST request to delete Order.
-router.post('/order/:id/delete', order_controller.order_delete_post);
-
-// GET request to update Order.
-router.get('/order/:id/update', order_controller.order_update_get);
-
-// POST request to update Order.
-router.post('/order/:id/update', order_controller.order_update_post);
-
 // GET request for one Order.
 router.get('/order/:id', order_controller.order_detail);
 
@@ -70,6 +56,18 @@ router.get('/order/:id/archive', order_controller.archive_file_detail);
 
 // GET request for list of all Orders (processed orders)
 router.get('/orders', order_controller.order_list);
+
+/// ERROR ROUTES ///
+
+// GET error home page.
+router.get('/errors', error_controller.error_list);
+
+// POST request for error creating.
+//router.post('/errors/create', error_controller.error_create_post);
+
+// GET request to delete error.
+router.get('/errors/:id/delete', error_controller.error_delete_get);
+
 
 /// CUSTOMER ROUTES ///
 
@@ -82,26 +80,17 @@ router.post('/customer/create', customer_controller.customer_create_post);
 // GET request to delete Customer.
 router.get('/customer/:id/delete', customer_controller.customer_delete_get);
 
-// POST request to delete Customer.
-//router.post('/customer/:id/delete', customer_controller.customer_delete_post);
-
 // GET request to update Customer.
 router.get('/customer/:id/update', customer_controller.customer_update_get);
 
 // POST request to update Customer.
 router.post('/customer/:id/update', customer_controller.customer_update_post);
 
-// GET request for one Customer.
-//router.get('/customer/:id', customer_controller.customer_detail);
-
 // GET request for list of all Customer.
 router.get('/customer', customer_controller.customer_list);
 
 // GET request for Customer ShipTo list.
 router.get('/customer/:id/shipTo', customer_controller.customerShipTo_list);
-
-// GET request for Customer ShipTo list for AJAX request.
-//router.get('/customer/:id/shipToList', customer_controller.customerShipTo_list_ajax);
 
 // GET request for creating customer ShipTo address.
 router.get('/customer/:id/shipto/create', customer_controller.customerShipTo_create_get);

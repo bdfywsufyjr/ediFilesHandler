@@ -10,6 +10,7 @@ var Order                       = require('../models/order');
 
 var customerController          = require('../controllers/customerController');
 var settingsController          = require('../controllers/settingsController');
+var errorController             = require('../controllers/errorController');
 
 
 var fs      = require('fs');
@@ -200,6 +201,12 @@ exports.autoModeProcess = () => {
                    jdeOrderCreateRequest(req, function (err, result) {
                        if (err) {
                            console.log('Order: ' + order['ORDER'].NUMBER + ' Error: ' + err.message);
+                           let error = {order: order['ORDER'].NUMBER, fileName: 'file', status: err.statusCode, response: err.message}
+                           errorController.error_create(error)
+                               .then( res => {
+                                   //moveFile(folder + result.fileName, folder + '/errors/', result.fileName);
+                                   console.log('-----------Here file have to be moved at error folder' + res);
+                               })
                        } else {
                            settingsController.getGlobalSettings(function (err, data) {
                                var folder = data[0].folder;
