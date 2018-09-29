@@ -199,21 +199,19 @@ exports.autoModeProcess = () => {
                result.forEach(function (order) {
                    var req = {'params': {'id': order['ORDER'].NUMBER}};
                    jdeOrderCreateRequest(req, function (err, result) {
-                       if (err) {
-                           console.log('Order: ' + order['ORDER'].NUMBER + ' Error: ' + err.message);
-                           let error = {order: order['ORDER'].NUMBER, fileName: 'file', status: err.statusCode, response: err.message}
-                           errorController.error_create(error)
-                               .then( res => {
-                                   //moveFile(folder + result.fileName, folder + '/errors/', result.fileName);
-                                   console.log('-----------Here file have to be moved at error folder' + res);
-                               })
-                       } else {
-                           settingsController.getGlobalSettings(function (err, data) {
-                               var folder = data[0].folder;
-
+                       settingsController.getGlobalSettings( (e, data) => {
+                           var folder = data[0].folder;
+                           if (err) {
+                               let file = order['FILENAME'];
+                               let error = {order: order['ORDER'].NUMBER, fileName: file, status: err.statusCode, response: err.message}
+                               errorController.error_create(error)
+                                   .then( res => {
+                                       moveFile(folder + file, folder + '/errors/', file);
+                                   })
+                           } else {
                                moveFile(folder + result.fileName, folder + '/archive/', 'SP_' + result.orderId + '.xml');
-                           })
-                       }
+                           }
+                       });
                    });
                })
            })
