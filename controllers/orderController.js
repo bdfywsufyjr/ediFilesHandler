@@ -149,9 +149,21 @@ async function getDataForOrderRequestWithPromise(req) {
     let folder = settings.folder;
     let file = order['FILENAME'];
 
+    var options = {
+        url: 'https://kiev.elkogroup.com/api/Sales/CreateOrder?username=' + data.login + '&password=' + data.password,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        resolveWithFullResponse: true,
+        body: '',
+        json: true
+    };
+
     if (!data) {
         let error = {order: order['ORDER'].NUMBER, fileName: file, status: 'undefined', response: 'Customer doesnt exists'};
         errorController.error_create(error).then( () => {moveFile(folder + file, folder + '/errors/', file)});
+
     } else {
         var shipTo;
         var orderLines = [];
@@ -176,20 +188,9 @@ async function getDataForOrderRequestWithPromise(req) {
             "customerPO": order['ORDER'].NUMBER[0], "orderLines": orderLines
         };
 
-        var options = {
-            url: 'https://kiev.elkogroup.com/api/Sales/CreateOrder?username=' + data.login + '&password=' + data.password,
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            resolveWithFullResponse: true,
-            body: json,
-            json: true
-        };
+        options.body = json;
 
-        var requestOptions = {request: options, order: order, customer: data};
-
-        return requestOptions;
+        return {request: options, order: order, customer: data};
     }
 }
 
@@ -197,8 +198,6 @@ async function getDataForOrderRequestWithPromise(req) {
 async function createOrderPostRequest(req, callback) {
 
     let options = await getDataForOrderRequestWithPromise(req);
-
-    console.log('Options: ' + options.request);
 
     // API request for order
     rp(options.request)
@@ -252,21 +251,29 @@ async function createOrderPostRequest(req, callback) {
 exports.autoModeProcess = async () => {
 
     var orders = await readSourceFolderWithPromise(false);
-    //var buyers = orders.reduce(function (r, o) {
-    //    r.push(o['ORDER']['HEAD'][0]['BUYER']);
+    let settings = await settingsController.getGlobalSettingsWithPromise();
+    let folder = settings.folder;
+    var buyers = orders.reduce(function (r, o) {
+        r.push(o['ORDER']['HEAD'][0]['BUYER']);
 
-    //    return r;
-    //}, []);
+        return r;
+    }, []);
 
-    //var rest = await customerController.checkBuyers(buyers);
+    var matchedBuyers = await customerController.checkBuyers(buyers);
+    var matchedOrders = orders.filter(o1 => matchedBuyers.find(o2 => o1['ORDER']['HEAD'][0]['BUYER'] == o2.gln));
+    var restOrders = orders.filter(o => !matchedOrders.find(o2 => o['ORDER'].NUMBER === o2['ORDER'].NUMBER));
 
-    //var result = orders.filter(o1 => rest.find(o2 => o1['ORDER']['HEAD'][0]['BUYER'] == o2.gln));
-
-    orders.forEach(function (order) {
+    if (restOrders.length > 0) {
+        restOrders.forEach( order => {
+            let file = order['FILENAME'];
+            let error = {order: order['ORDER'].NUMBER, fileName: file, status: 'undefined', response: 'Customer doesnt exists'};
+            errorController.error_create(error).then( () => {moveFile(folder + file, folder + '/errors/', file)});
+        })
+    }
+    
+    matchedOrders.forEach(function (order) {
         var req = {'params': {'id': order['ORDER'].NUMBER}};
         createOrderPostRequest(req, async function (err, result) {
-            let settings = await settingsController.getGlobalSettingsWithPromise();
-            let folder = settings.folder;
             let file = order['FILENAME'];
             if (err) {
                 let error = {order: order['ORDER'].NUMBER, fileName: file, status: err.statusCode, response: err.message};
@@ -276,31 +283,6 @@ exports.autoModeProcess = async () => {
             }
         }).catch((err) => {console.log('err: ' + err)});;
     });
-
-/*
-    result.forEach(function (order) {
-        var req = {'params': {'id': order['ORDER'].NUMBER}};
-        createOrderPostRequest(req, async function (err, result) {
-            let settings = await settingsController.getGlobalSettingsWithPromise();
-            let folder = settings.folder;
-            if (err) {
-                let file = order['FILENAME'];
-                let error = {
-                    order: order['ORDER'].NUMBER, fileName: file,
-                    status: err.statusCode, response: err.message
-                };
-                errorController.error_create(error)
-                    .then( res => {moveFile(folder + file, folder + '/errors/', file)} )
-            } else {
-                moveFile(folder + result.fileName, folder + '/archive/', 'SP_' + result.orderId + '.xml');
-            }
-        });
-    })
-*/
-    //customerController.checkBuyers(buyers)
-    //    .then(rest => {
-
-    //    })
 }
 
 /**
