@@ -62,6 +62,9 @@ router.get('/orders', order_controller.order_list);
 // GET error home page.
 router.get('/errors', error_controller.error_list);
 
+// GET request to view file details with error.
+router.get('/errors/:id', error_controller.error_file_detail);
+
 // POST request for error creating.
 //router.post('/errors/create', error_controller.error_create_post);
 

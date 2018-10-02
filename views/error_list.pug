@@ -24,11 +24,12 @@ block content
                     td #{error.filename}
                     td #{error.status}
                     td #{error.response}
-                    td #{order.created_at.toLocaleString('uk-UA')}
+                    td #{error.created_at.toLocaleString('uk-UA')}
                     td
                         div.dropdown
                             a(href='#' data-toggle='dropdown').dropdown-toggle Действия
                             div.dropdown-menu
-                                a(href='../data/detail/' + error.order).dropdown-item Детали заказа
-                                a(href='../data/error/' + error._id + '/delete').dropdown-item Удалить
+                                a(href='../data/errors/' + error.order).dropdown-item Детали
+                                a(href='../data/detail/' + error.order).dropdown-item Создать заказ
+                                a(href='../data/errors/' + error._id + '/delete').dropdown-item Удалить
 

@@ -7,7 +7,7 @@ var path                        = require('path');
 var rp                          = require('request-promise');
 var errors                      = require('request-promise/errors');
 
-var helper                      = require('../controllers/helper');
+var helper                      = require('../helper');
 
 var customerController          = require('../controllers/customerController');
 var settingsController          = require('../controllers/settingsController');
@@ -17,48 +17,6 @@ var errorController             = require('../controllers/errorController');
  *
  * Helper methods
  */
-
-async function readSourceFolderWithPromise(archive) {
-
-    let settings = await settingsController.getGlobalSettingsWithPromise();
-    let sourceFolder = archive == false ? settings.folder : settings.folder + '/archive/';
-
-    var content = await readFolder(sourceFolder, '.xml')
-        .then(allContents => {
-            var results = [];
-
-            allContents.forEach(function (item) {
-                parser.parseString(item[1], function (err, result) {
-                    results.push(Object.assign(result, {"FILENAME": item[0]}));
-                })
-            });
-            return results;
-        }).catch(error => callback(error));
-
-    return content;
-}
-
-// Check and read folder content
-async function readSourceFolder(archive, callback) {
-
-    let settings = await settingsController.getGlobalSettingsWithPromise();
-
-    let sourceFolder = archive == false ? settings.folder : settings.folder + '/archive/';
-
-    if (sourceFolder) {
-        readFolder(sourceFolder, '.xml')
-            .then(allContents => {
-                var results = [];
-
-                allContents.forEach(function (item) {
-                    parser.parseString(item[1], function (err, result) {
-                        results.push(Object.assign(result, {"FILENAME": item[0]}));
-                    })
-                });
-                callback(null, results);
-            }).catch(error => callback(error));
-    }
-}
 
 // Prepare data for JDE order request
 async function findFileByOrderNumber(orderNumber){
@@ -83,71 +41,21 @@ async function findFileByOrderNumber(orderNumber){
 
     return content;
 }
-/*
-function getDataForOrderRequest(req, callback) {
 
-    findFileByOrderNumber(req.params.id, async function (order) {
-
-        let data = await customerController.getCustomerSettings(order['ORDER']['HEAD'][0]['BUYER']);
-        let settings = await settingsController.getGlobalSettingsWithPromise();
-        let folder = settings.folder;
-        let file = order['FILENAME'];
-
-        if (!data) {
-            let error = {order: order['ORDER'].NUMBER, fileName: file, status: 'undefined', response: 'Customer doesnt exists'};
-            errorController.error_create(error).then( () => {moveFile(folder + file, folder + '/errors/', file)});
-        } else {
-            var shipTo;
-            var orderLines = [];
-
-            data.shipTo.forEach(function (item) {
-                if (item.gln == order['ORDER']['HEAD'][0]['DELIVERYPLACE'][0]) {
-                    shipTo = item.jdeId;
-                }
-            });
-
-            order['ORDER']['HEAD'][0]['POSITION'].forEach(function (orderLine) {
-                var jsonOrderLine = {
-                    "productId": parseInt(orderLine.PRODUCTIDSUPPLIER[0]),
-                    "quantity": parseInt(orderLine.ORDEREDQUANTITY[0]),
-                    "price": parseFloat(orderLine.PRICEWITHVAT[0]),
-                    "customerProductId": parseInt(orderLine.PRODUCTIDBUYER[0])
-                };
-                orderLines.push(jsonOrderLine);
-            });
-
-            var json = {
-                "deliveryAddress": parseInt(shipTo),
-                "requestedDeliveryDate": parseInt(jdeDate(order['ORDER'].DATE)),
-                "orderIfAllAvailable": false,
-                "deliveryInstructions": "Номер заказа: " + order['ORDER'].NUMBER,
-                "customerPO": order['ORDER'].NUMBER[0],
-                "orderLines": orderLines
-            };
-
-            var options = {
-                url: 'https://kiev.elkogroup.com/api/Sales/CreateOrder?username=' + data.login + '&password=' + data.password,
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                resolveWithFullResponse: true,
-                body: json,
-                json: true
-            };
-
-            callback({request: options, order: order, customer: data})
-        }
-    });
-}
-*/
-async function getDataForOrderRequestWithPromise(req) {
+async function getDataForOrderRequest(req) {
 
     let order = await findFileByOrderNumber(req.params.id);
     let data = await customerController.getCustomerSettings(order['ORDER']['HEAD'][0]['BUYER']);
     let settings = await settingsController.getGlobalSettingsWithPromise();
     let folder = settings.folder;
     let file = order['FILENAME'];
+
+    if (!data) {
+        let error = {order: order['ORDER'].NUMBER, fileName: file, status: 'undefined', response: 'Customer doesnt exists'};
+        errorController.error_create(error).then( () => {moveFile(folder + file, folder + '/errors/', file)});
+
+        return
+    }
 
     var options = {
         url: 'https://kiev.elkogroup.com/api/Sales/CreateOrder?username=' + data.login + '&password=' + data.password,
@@ -160,44 +68,38 @@ async function getDataForOrderRequestWithPromise(req) {
         json: true
     };
 
-    if (!data) {
-        let error = {order: order['ORDER'].NUMBER, fileName: file, status: 'undefined', response: 'Customer doesnt exists'};
-        errorController.error_create(error).then( () => {moveFile(folder + file, folder + '/errors/', file)});
+    var shipTo;
+    var orderLines = [];
 
-    } else {
-        var shipTo;
-        var orderLines = [];
+    data.shipTo.forEach(function (item) {
+        if (item.gln == order['ORDER']['HEAD'][0]['DELIVERYPLACE'][0]) {
+            shipTo = item.jdeId;
+        }
+    });
 
-        data.shipTo.forEach(function (item) {
-            if (item.gln == order['ORDER']['HEAD'][0]['DELIVERYPLACE'][0]) {
-                shipTo = item.jdeId;
-            }
-        });
-
-        order['ORDER']['HEAD'][0]['POSITION'].forEach(function (orderLine) {
-            var jsonOrderLine = {
-                "productId": parseInt(orderLine.PRODUCTIDSUPPLIER[0]), "quantity": parseInt(orderLine.ORDEREDQUANTITY[0]),
-                "price": parseFloat(orderLine.PRICEWITHVAT[0]), "customerProductId": parseInt(orderLine.PRODUCTIDBUYER[0])
-            };
-            orderLines.push(jsonOrderLine);
-        });
-
-        var json = {
-            "deliveryAddress": parseInt(shipTo), "requestedDeliveryDate": parseInt(jdeDate(order['ORDER'].DATE)),
-            "orderIfAllAvailable": false, "deliveryInstructions": "Номер заказа: " + order['ORDER'].NUMBER,
-            "customerPO": order['ORDER'].NUMBER[0], "orderLines": orderLines
+    order['ORDER']['HEAD'][0]['POSITION'].forEach(function (orderLine) {
+        var jsonOrderLine = {
+            "productId": parseInt(orderLine.PRODUCTIDSUPPLIER[0]), "quantity": parseInt(orderLine.ORDEREDQUANTITY[0]),
+            "price": parseFloat(orderLine.PRICEWITHVAT[0]), "customerProductId": parseInt(orderLine.PRODUCTIDBUYER[0])
         };
+        orderLines.push(jsonOrderLine);
+    });
 
-        options.body = json;
+    var json = {
+        "deliveryAddress": parseInt(shipTo), "requestedDeliveryDate": parseInt(jdeDate(order['ORDER'].DATE)),
+        "orderIfAllAvailable": false, "deliveryInstructions": "Номер заказа: " + order['ORDER'].NUMBER,
+        "customerPO": order['ORDER'].NUMBER[0], "orderLines": orderLines
+    };
 
-        return {request: options, order: order, customer: data};
-    }
+    options.body = json;
+
+    return {request: options, order: order, customer: data};
 }
 
 // JDE order request to ELKO
 async function createOrderPostRequest(req, callback) {
 
-    let options = await getDataForOrderRequestWithPromise(req);
+    let options = await getDataForOrderRequest(req);
 
     // API request for order
     rp(options.request)
@@ -250,7 +152,7 @@ async function createOrderPostRequest(req, callback) {
 
 exports.autoModeProcess = async () => {
 
-    var orders = await readSourceFolderWithPromise(false);
+    var orders = await readSourceFolder('new');
     let settings = await settingsController.getGlobalSettingsWithPromise();
     let folder = settings.folder;
     var buyers = orders.reduce(function (r, o) {
@@ -266,11 +168,11 @@ exports.autoModeProcess = async () => {
     if (restOrders.length > 0) {
         restOrders.forEach( order => {
             let file = order['FILENAME'];
-            let error = {order: order['ORDER'].NUMBER, fileName: file, status: 'undefined', response: 'Customer doesnt exists'};
+            let error = {order: order['ORDER'].NUMBER, fileName: file, status: 'undefined', response: 'Customer does not exists'};
             errorController.error_create(error).then( () => {moveFile(folder + file, folder + '/errors/', file)});
         })
     }
-    
+
     matchedOrders.forEach(function (order) {
         var req = {'params': {'id': order['ORDER'].NUMBER}};
         createOrderPostRequest(req, async function (err, result) {
@@ -290,59 +192,52 @@ exports.autoModeProcess = async () => {
  */
 
 // Index page
-exports.index = function (req, res) {
+exports.index = async function (req, res) {
 
-    readSourceFolder(false, function(err, orders) {
+    var orders = await readSourceFolder('new');
 
-        if (err) {
-            // Something bad happened
-            res.render('error', {message: err});
+    var buyers = orders.reduce( function (r, o) {
+        r.push(o['ORDER']['HEAD'][0]['BUYER']);
 
-            return;
-        }
+        return r;
+    }, []);
 
-        var buyers = orders.reduce( function (r, o) {
-            r.push(o['ORDER']['HEAD'][0]['BUYER']);
+    customerController.getCustomersSettings(buyers, function (rest) {
+
+        var result = orders.reduce(function (r, o1) {
+            var f = rest.find(function (o2) {
+
+                return o1['ORDER']['HEAD'][0]['BUYER'] == o2.gln
+            });
+
+            var address = 'undefined';
+
+            if (f) {
+                f.shipTo.forEach(function (shipTo) {
+                    if (shipTo.gln == o1['ORDER']['HEAD'][0]['DELIVERYPLACE'][0]) {
+                        address = shipTo.address;
+                    }
+                });
+            }
+
+            r.push(f ? Object.assign(o1, {"CUSTOMER": f.name}, {"SHIPTO": address}) : Object.assign(o1, {"CUSTOMER": 'undefined'}, {"SHIPTO": address}));
 
             return r;
         }, []);
 
-        customerController.getCustomersSettings(buyers, function (rest) {
-
-            var result = orders.reduce(function (r, o1) {
-                var f = rest.find(function (o2) {
-
-                    return o1['ORDER']['HEAD'][0]['BUYER'] == o2.gln
-                });
-
-                var address = 'undefined';
-
-                if (f) {
-                    f.shipTo.forEach(function (shipTo) {
-                        if (shipTo.gln == o1['ORDER']['HEAD'][0]['DELIVERYPLACE'][0]) {
-                            address = shipTo.address;
-                        }
-                    });
-                }
-
-                r.push(f ? Object.assign(o1, {"CUSTOMER": f.name}, {"SHIPTO": address}) : Object.assign(o1, {"CUSTOMER": 'undefined'}, {"SHIPTO": address}));
-
-                return r;
-            }, []);
-
-            res.render('data_list', {title: 'Список заказов', result: result});
-        });
+        res.render('data_list', {title: 'Список заказов', result: result});
     });
 };
 
 // Display detail page for a specific file from index page.
-exports.file_detail = function(req, res) {
-    readSourceFolder(false, function (err, results) {
-        results.forEach(function (order) {
-            if (order['ORDER'].NUMBER == req.params.id ) {
-                res.render('data_detail', { title:  req.params.id, header: order, details: order['ORDER']['HEAD'][0]['POSITION'] });
-            }
-        });
+exports.file_detail = async function(req, res) {
+
+    var orders = await readSourceFolder('new');
+
+    orders.forEach( (order) => {
+        if (order['ORDER'].NUMBER == req.params.id ) {
+            res.render('data_detail', { title:  req.params.id, header: order, details: order['ORDER']['HEAD'][0]['POSITION'] });
+        }
     });
 };
 
@@ -360,7 +255,6 @@ exports.order_list = function(req, res) {
                 if (order.soldTo) { // check whether SoldTo exists in related entity
                     order.soldTo.shipTo.forEach(function (shipTo_list) {
                         if (shipTo_list.jdeId == order.shipTo) {
-                            //console.log(shipTo_list.address);
                             orders.push(Object.assign(order, {"deliveryAddress": shipTo_list.address}));
                         }
                     });
@@ -390,43 +284,39 @@ exports.order_detail = function(req, res) {
 // Display detail page for a specific file in archive folder.
 exports.archive_file_detail = function(req, res) {
 
-    readSourceFolder(true, function (err, results) {
+    let files = readSourceFolder('archive');
 
-        Order.findById(req.params.id)
-            .exec(function (err, order) {
-                if (err) {
-                    console.log(err);
-                    return;
+    Order.findById(req.params.id)
+        .exec(function (err, order) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+
+            files.forEach(function (file) {
+                if (file['FILENAME'] == order.fileName ) {
+                    res.render('data_detail', { title:  order.ediOrder, header:file, details: file['ORDER']['HEAD'][0]['POSITION'] });
                 }
-
-                results.forEach(function (file) {
-                    if (file['FILENAME'] == order.fileName ) {
-                        res.render('data_detail', { title:  order.ediOrder, header:file, details: file['ORDER']['HEAD'][0]['POSITION'] });
-                    }
-                });
             });
-    });
+        });
 };
 
 // Order create GET.
-exports.order_create_get = function(req, res) {
+exports.order_create_get = async function(req, res) {
+
+    let settings = await settingsController.getGlobalSettingsWithPromise();
+    let folder = settings.folder;
+
     createOrderPostRequest(req, function (err, result) {
         if (err) {
             // Something bad happened
-
             res.json({'status': 'error', 'message': err.message, 'id': ''});
 
             return;
         }
 
-        settingsController.getGlobalSettings(function (err, data) {
-            var folder = data[0].folder;
+        moveFile(folder + result.fileName, folder + '/archive/', 'SP_' + result.orderId + '.xml');
 
-            if (folder) {
-                moveFile(folder + result.fileName, folder + '/archive/', 'SP_' + result.orderId + '.xml');
-            }
-
-            res.json({'status': 'success', 'message': '', 'id': result._id});
-        })
+        res.json({'status': 'success', 'message': '', 'id': result._id});
     });
 };

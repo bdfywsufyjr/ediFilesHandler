@@ -1,5 +1,9 @@
 var fs      = require('fs');
 var path    = require('path');
+var xml2js  = require('xml2js');
+var parser  = new xml2js.Parser();
+
+var settingsController = require('./controllers/settingsController');
 
 module.exports = readFolder = (dirname, extFilter) => {
 
@@ -18,6 +22,27 @@ module.exports = readFolder = (dirname, extFilter) => {
                 })
             })).catch( error => Promise.reject(error)))
 };
+
+module.exports = readSourceFolder = async (source) => {
+
+    let settings = await settingsController.getGlobalSettingsWithPromise();
+
+    let sourceFolder = source == 'new' ? settings.folder : source == 'archive' ? settings.folder + '/archive/' : settings.folder + '/errors/';
+
+    var content = await readFolder(sourceFolder, '.xml')
+        .then(allContents => {
+            var results = [];
+
+            allContents.forEach(function (item) {
+                parser.parseString(item[1], function (err, result) {
+                    results.push(Object.assign(result, {"FILENAME": item[0]}));
+                })
+            });
+            return results;
+        }).catch(error => console.log(error));
+
+    return content;
+}
 
 module.exports = jdeDate = (ediDate) => {
     var myDate = new Date(ediDate);
