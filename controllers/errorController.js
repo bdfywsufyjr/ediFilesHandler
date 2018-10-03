@@ -8,9 +8,7 @@ var helper                      = require('../helper');
 
 var Error                       = require('../models/error');
 
-var customerController          = require('../controllers/customerController');
 var settingsController          = require('../controllers/settingsController');
-var orderController             = require('../controllers/orderController');
 
 var fs      = require('fs');
 var path    = require('path');
@@ -77,10 +75,6 @@ exports.error_delete_get = function (req, res) {
         .exec()
         .then((result, err) => {
             if (err) { console.log(err); return; }
-
-            console.log(result._id);
-
-            //moveFile(folder + 'errors/' + result.filename, folder, result.filename);
 
             res.redirect('/data/errors');
         });
