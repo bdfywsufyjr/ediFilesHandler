@@ -32,9 +32,9 @@ block content
                             a(href='#' data-toggle='dropdown').dropdown-toggle Действия
                             div.dropdown-menu
                                 - if (customer == 'undefined' || deliveryPlase == 'undefined')
-                                a(href='#' class='disabled' name='submit' params={order: order['ORDER'].NUMBER[0] }).dropdown-item Создать заказ
+                                    a(href='#' class='disabled' name='submit' params={order: order['ORDER'].NUMBER[0] }).dropdown-item Создать заказ
                                 - else
-                                a(href='#' class='next' name='submit' params={order: order['ORDER'].NUMBER[0] }).dropdown-item Создать заказ
+                                    a(href='#' class='next' name='submit' params={order: order['ORDER'].NUMBER[0] }).dropdown-item Создать заказ
                                 a(href='../data/detail/' + order['ORDER'].NUMBER).dropdown-item Детали
 
 

@@ -12,7 +12,16 @@ exports.customer_list = function(req, res) {
 };
 
 // Get one customer settings
-exports.getCustomerSettings = function(content, callback) {
+exports.getCustomerSettings = (content) => {
+
+    return Customer.findOne({gln: { $in: content}}, null, { sort: { updated_at: -1 } })
+        .exec()
+        .then((result) => {
+            return result;
+        });
+};
+
+/*exports.getCustomerSettings = function(content, callback) {
 
     Customer.findOne({
         gln: { $in: content}
@@ -23,7 +32,7 @@ exports.getCustomerSettings = function(content, callback) {
 
             callback(result);
         });
-};
+};*/
 
 // Get customers settings
 exports.getCustomersSettings = function(content, callback) {
@@ -85,7 +94,7 @@ exports.customer_create_post = function(req, res) {
             else {
                 customer.save(function (err) {
                     if (err) { console.log(err); }
-                    // Customer saved. Redirect to genre detail page.
+                    // Customer saved. Redirect to detail page.
                     res.redirect(customer.url);
                 });
             }

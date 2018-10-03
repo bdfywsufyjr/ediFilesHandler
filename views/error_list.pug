@@ -1,0 +1,35 @@
+extends layout
+
+block content
+
+    h3=title
+
+    p
+
+    <!-- Data table-->
+
+    table#pickle.display
+        thead
+            tr
+                th Заказ
+                th Файл
+                th Статус
+                th Ошибка
+                th Дата
+                th Действия
+        tbody
+            each error in errors_list
+                tr
+                    td #{error.order}
+                    td #{error.filename}
+                    td #{error.status}
+                    td #{error.response}
+                    td #{error.created_at.toLocaleString('uk-UA')}
+                    td
+                        div.dropdown
+                            a(href='#' data-toggle='dropdown').dropdown-toggle Действия
+                            div.dropdown-menu
+                                a(href='../data/errors/' + error.order).dropdown-item Детали
+                                a(href='../data/errors/' + error.order + '/move').dropdown-item Переместить
+                                a(href='../data/errors/' + error._id + '/delete').dropdown-item Удалить
+
