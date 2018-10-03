@@ -33,21 +33,13 @@ exports.getGlobalSettings = function(callback) {
         });
 };
 
-exports.getGlobalSettingsV2 = () => {
-
-    return new Promise( (resolve, reject) => {
-        Settings.find({}, null, { sort: { updated_at: -1 } })
-            .exec(function (err, result) {
-                if (err) { reject(err); }
-
-                if (result.length > 0) {
-                    resolve(null, result);
-                } else {
-                    resolve('Sourcefolder path should be entered');
-                }
-            });
-    })
-};
+exports.getGlobalSettingsWithPromise = () => {
+    return Settings.findOne({}, null, {sort: {updated_at: -1}})
+        .exec()
+        .then((res) => {
+            return res;
+        })
+}
 
 // Display Global Settings create form on GET.
 exports.globalSettings_create_get = function(req, res) {
