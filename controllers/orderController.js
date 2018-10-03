@@ -51,7 +51,7 @@ async function getDataForOrderRequest(req) {
     let file = order['FILENAME'];
 
     if (!data) {
-        let error = {order: order['ORDER'].NUMBER, fileName: file, status: 'undefined', response: 'Customer doesnt exists'};
+        let error = {order: order['ORDER'].NUMBER, filename: file, status: 'undefined', response: 'Customer doesnt exists'};
         errorController.error_create(error).then( () => {moveFile(folder + file, folder + '/errors/', file)});
 
         return
@@ -168,7 +168,7 @@ exports.autoModeProcess = async () => {
     if (restOrders.length > 0) {
         restOrders.forEach( order => {
             let file = order['FILENAME'];
-            let error = {order: order['ORDER'].NUMBER, fileName: file, status: 'undefined', response: 'Customer does not exists'};
+            let error = {order: order['ORDER'].NUMBER, filename: file, status: 'undefined', response: 'Customer does not exists'};
             errorController.error_create(error).then( () => {moveFile(folder + file, folder + '/errors/', file)});
         })
     }
@@ -178,7 +178,7 @@ exports.autoModeProcess = async () => {
         createOrderPostRequest(req, async function (err, result) {
             let file = order['FILENAME'];
             if (err) {
-                let error = {order: order['ORDER'].NUMBER, fileName: file, status: err.statusCode, response: err.message};
+                let error = {order: order['ORDER'].NUMBER, filename: file, status: err.statusCode, response: err.message};
                 errorController.error_create(error).then( () => {moveFile(folder + file, folder + '/errors/', file)});
             } else {
                 moveFile(folder + file, folder + '/archive/', 'SP_' + result.orderId + '.xml');

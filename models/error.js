@@ -5,7 +5,7 @@ var Schema = mongoose.Schema;
 var ErrorSchema = new Schema(
     {
         order:          { type: String },
-        fileName:       { type: String },
+        filename:       { type: String },
         status:         { type: String },
         response:       { type: String },
         created_at:     { type: Date, default: Date.now }

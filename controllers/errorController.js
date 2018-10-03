@@ -43,7 +43,7 @@ exports.error_create = (content) => {
         let newError = new Error(
             {
                 order:      content.order,
-                fileName:   content.fileName,
+                filename:   content.filename,
                 status:     content.status,
                 response:   content.response
             }
@@ -57,7 +57,32 @@ exports.error_create = (content) => {
     })
 };
 
-exports.error_delete_get = function (req, res) {
+exports.error_move_get = async function (req, res) {
+    let settings = await settingsController.getGlobalSettingsWithPromise();
+    let folder = settings.folder;
 
+    Error.findOneAndRemove({order: req.params.id}, { sort: { created_at: -1 } })
+        .exec()
+        .then((result, err) => {
+            if (err) { console.log(err); return; }
+
+            moveFile(folder + 'errors/' + result.filename, folder, result.filename);
+
+            res.redirect('../../');
+        });
+};
+
+exports.error_delete_get = function (req, res) {
+    Error.findByIdAndRemove(req.params.id)
+        .exec()
+        .then((result, err) => {
+            if (err) { console.log(err); return; }
+
+            console.log(result._id);
+
+            //moveFile(folder + 'errors/' + result.filename, folder, result.filename);
+
+            res.redirect('/data/errors');
+        });
 };
 

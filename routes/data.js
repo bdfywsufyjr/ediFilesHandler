@@ -65,8 +65,8 @@ router.get('/errors', error_controller.error_list);
 // GET request to view file details with error.
 router.get('/errors/:id', error_controller.error_file_detail);
 
-// POST request for error creating.
-//router.post('/errors/create', error_controller.error_create_post);
+// GET request to move error file.
+router.get('/errors/:id/move', error_controller.error_move_get);
 
 // GET request to delete error.
 router.get('/errors/:id/delete', error_controller.error_delete_get);
