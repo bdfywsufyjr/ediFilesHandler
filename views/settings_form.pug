@@ -19,6 +19,12 @@ block content
                 option(selected=(undefined === settings ? true : (settings.mode == 'Auto' ? false : true))) Manual
                 option(selected=(settings.mode == 'Auto' ? true : false)) Auto
             p
+            label(for='apiUrl') URL:
+            input#apiUrl.form-control(type='text', placeholder='URL' name='apiUrl' value=(undefined === settings ? '' : settings.apiUrl))
+            p
+            label(for='esdUrl') ESD URL:
+            input#esdUrl.form-control(type='text', placeholder='ESD URL' name='esdUrl' value=(undefined === settings ? '' : settings.esdUrl))
+            p
             label(for='email') Email:
             input#email.form-control(type='text', placeholder='Email' name='email' value=(undefined === settings ? '' : settings.email))
             p

@@ -79,6 +79,8 @@ exports.customer_create_post = function(req, res) {
         login:      req.body.login,
         password:   req.body.password,
         gln:        req.body.gln,
+        esd:        req.body.esd,
+        apiKey:     req.body.apiKey,
         shipTo:     shipTo,
         created_at: Date.now()
     });
@@ -134,6 +136,8 @@ exports.customer_update_post = function(req, res) {
         shipTo.push({jdeId: req.body.sTjdeId[i], gln: req.body.sTgln[i], address: req.body.sTaddress[i]})
     }
 
+    console.log(req.body.esd);
+
     var editedCustomer = new Customer(
         {
             jdeId:      req.body.jdeId,
@@ -141,6 +145,8 @@ exports.customer_update_post = function(req, res) {
             login:      req.body.login,
             password:   req.body.password,
             gln:        req.body.gln,
+            esd:        req.body.esd == 'on' ? true : false,
+            apiKey:     req.body.apiKey,
             shipTo:     shipTo,
             _id:        req.params.id //This is required, or a new ID will be assigned!
         });

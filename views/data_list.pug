@@ -13,6 +13,7 @@ block content
             tr
                 th Клиент
                 th Номер заказа
+                th Тип
                 th Дата заказа
                 th Дата доставки
                 th Адрес доставки
@@ -24,6 +25,7 @@ block content
                 tr
                     td #{order['CUSTOMER']}
                     td #{order['ORDER'].NUMBER}
+                    td #{order['type']}
                     td #{order['ORDER'].DATE}
                     td #{order['ORDER'].DELIVERYDATE}
                     td #{order['SHIPTO']}

@@ -14,6 +14,7 @@ block content
                 th Код GLN
                 th Логин
                 th Пароль
+                th ESD
                 th Действия
 
         tbody
@@ -26,6 +27,7 @@ block content
                     td #{customer.gln}
                     td #{customer.login}
                     td #{customer.password}
+                    td #{customer.esd ? 'Y' : 'N'}
                     td
                         div.dropdown
                             a(href='#' data-toggle='dropdown').dropdown-toggle Действия
