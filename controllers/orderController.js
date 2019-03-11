@@ -155,7 +155,6 @@ async function createOrderPostRequest(options) {
  * Application Auto mode processing
  */
 
-//TODO: Check and implement esd orders handling
 exports.autoModeProcess = async () => {
 
     var orders = await readSourceFolder('new');
@@ -180,16 +179,24 @@ exports.autoModeProcess = async () => {
     }
 
     matchedOrders.forEach(function (order) {
-        var req = {'params': {'id': order['ORDER'].NUMBER}};
-        createOrderPostRequest(req, async function (err, result) {
-            let file = order['FILENAME'];
-            if (err) {
-                let error = {order: order['ORDER'].NUMBER, filename: file, status: err.statusCode, response: err.message};
+        const file = order['FILENAME'];
+        Promise.resolve(getDataForOrderRequest({order: order, settings: settings}))
+            .then(request => {
+                Promise.resolve(createOrderPostRequest(request))
+                    .then(result => {
+                        moveFile(folder + result.fileName, folder + '/archive/', 'SP_' + result.orderId + '.xml');
+
+                    }).catch(err => {
+                    const error = {order: order['ORDER'].NUMBER, filename: file, status: err.statusCode, response: err.message};
+                    errorController.error_create(error).then( () => {moveFile(folder + file, folder + '/errors/', file)});
+                })
+            })
+            .catch(err => {
+                //res.json({'status': 'error', 'message': error.message, 'id': ''});
+                const error = {order: order['ORDER'].NUMBER, filename: file, status: err.statusCode, response: err.message};
                 errorController.error_create(error).then( () => {moveFile(folder + file, folder + '/errors/', file)});
-            } else {
-                moveFile(folder + file, folder + '/archive/', 'SP_' + result.orderId + '.xml');
-            }
-        }).catch((err) => {console.log('err: ' + err)});;
+            });
+
     });
 }
 

@@ -2,25 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bd93c1d3-ac94-4950-a707-4a41b9f00b40" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/controllers/esdController.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/esd.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/views/esd_list.pug" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controllers/customerController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/customerController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controllers/orderController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/orderController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controllers/settingsController.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/settingsController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/helper.js" beforeDir="false" afterPath="$PROJECT_DIR$/helper.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/customer.js" beforeDir="false" afterPath="$PROJECT_DIR$/models/customer.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/order.js" beforeDir="false" afterPath="$PROJECT_DIR$/models/order.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/settings.js" beforeDir="false" afterPath="$PROJECT_DIR$/models/settings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/data.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/data.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/customer_form.pug" beforeDir="false" afterPath="$PROJECT_DIR$/views/customer_form.pug" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/customer_list.pug" beforeDir="false" afterPath="$PROJECT_DIR$/views/customer_list.pug" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/data_list.pug" beforeDir="false" afterPath="$PROJECT_DIR$/views/data_list.pug" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/layout.pug" beforeDir="false" afterPath="$PROJECT_DIR$/views/layout.pug" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/settings_form.pug" beforeDir="false" afterPath="$PROJECT_DIR$/views/settings_form.pug" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/settings_list.pug" beforeDir="false" afterPath="$PROJECT_DIR$/views/settings_list.pug" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -34,38 +16,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="orderController.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="orderController.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/controllers/orderController.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="425">
-              <caret line="232" column="182" selection-start-line="232" selection-start-column="182" selection-end-line="232" selection-end-column="182" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="data_detail.pug" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/views/data_detail.pug">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="561">
-              <caret line="33" column="6" selection-start-line="33" selection-start-column="6" selection-end-line="33" selection-end-column="6" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="data_list.pug" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/views/data_list.pug">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="161">
-              <caret line="27" column="36" selection-start-line="27" selection-start-column="36" selection-end-line="27" selection-end-column="36" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="layout.pug" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/views/layout.pug">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
-              <caret line="71" column="57" selection-start-line="71" selection-start-column="57" selection-end-line="71" selection-end-column="57" />
+            <state relative-caret-position="308">
+              <caret line="156" lean-forward="true" selection-start-line="156" selection-end-line="156" />
             </state>
           </provider>
         </entry>
@@ -111,13 +66,13 @@
         <option value="$PROJECT_DIR$/controllers/customerController.js" />
         <option value="$PROJECT_DIR$/views/customer_form.pug" />
         <option value="$PROJECT_DIR$/models/order.js" />
-        <option value="$PROJECT_DIR$/views/layout.pug" />
         <option value="$PROJECT_DIR$/models/settings.js" />
         <option value="$PROJECT_DIR$/views/settings_list.pug" />
         <option value="$PROJECT_DIR$/views/settings_form.pug" />
         <option value="$PROJECT_DIR$/controllers/settingsController.js" />
-        <option value="$PROJECT_DIR$/controllers/orderController.js" />
         <option value="$PROJECT_DIR$/views/data_list.pug" />
+        <option value="$PROJECT_DIR$/views/layout.pug" />
+        <option value="$PROJECT_DIR$/controllers/orderController.js" />
       </list>
     </option>
   </component>
@@ -157,21 +112,6 @@
             <path>
               <item name="ediFilesHandler" type="b2602c69:ProjectViewProjectNode" />
               <item name="ediFilesHandler" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="ediFilesHandler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="ediFilesHandler" type="462c0819:PsiDirectoryNode" />
-              <item name="controllers" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="ediFilesHandler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="ediFilesHandler" type="462c0819:PsiDirectoryNode" />
-              <item name="models" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="ediFilesHandler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="ediFilesHandler" type="462c0819:PsiDirectoryNode" />
-              <item name="views" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -240,12 +180,12 @@
       <workItem from="1550757995715" duration="1630000" />
       <workItem from="1550825838361" duration="17911000" />
       <workItem from="1551780279305" duration="5840000" />
-      <workItem from="1552130729510" duration="28269000" />
+      <workItem from="1552130729510" duration="29892000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="139167000" />
+    <option name="totallyTimeSpent" value="140790000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
@@ -609,17 +549,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/views/data_detail.pug">
+    <entry file="file://$PROJECT_DIR$/views/layout.pug">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="561">
-          <caret line="33" column="6" selection-start-line="33" selection-start-column="6" selection-end-line="33" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/controllers/orderController.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="232" column="182" selection-start-line="232" selection-start-column="182" selection-end-line="232" selection-end-column="182" />
+        <state relative-caret-position="702">
+          <caret line="71" column="35" selection-start-line="71" selection-start-column="35" selection-end-line="71" selection-end-column="35" />
         </state>
       </provider>
     </entry>
@@ -630,10 +563,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/views/layout.pug">
+    <entry file="file://$PROJECT_DIR$/views/data_detail.pug">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="71" column="57" selection-start-line="71" selection-start-column="57" selection-end-line="71" selection-end-column="57" />
+        <state relative-caret-position="561">
+          <caret line="33" column="6" selection-start-line="33" selection-start-column="6" selection-end-line="33" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/controllers/orderController.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="308">
+          <caret line="156" lean-forward="true" selection-start-line="156" selection-end-line="156" />
         </state>
       </provider>
     </entry>
