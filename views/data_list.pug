@@ -39,7 +39,6 @@ block content
                                     a(href='#' class='next' name='submit' params={order: order['ORDER'].NUMBER[0] }).dropdown-item Создать заказ
                                 a(href='../data/detail/' + order['ORDER'].NUMBER).dropdown-item Детали
 
-
     script.
         $(document).ready(function () {
             $('a[class^="next"]').click(function () {
@@ -60,7 +59,6 @@ block content
                                 color: '#fff'
                             }
                         });
-
                     },
                     success: function (data) {
                         $.unblockUI({

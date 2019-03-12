@@ -119,8 +119,6 @@ async function getDataForOrderRequest(params) {
 // JDE order request to ELKO
 async function createOrderPostRequest(options) {
 
-    console.log(options.request);
-
     return new Promise( (resolve, reject) => {
         rp(options.request)
             .then(result => {
@@ -185,14 +183,12 @@ exports.autoModeProcess = async () => {
                 Promise.resolve(createOrderPostRequest(request))
                     .then(result => {
                         moveFile(folder + result.fileName, folder + '/archive/', 'SP_' + result.orderId + '.xml');
-
                     }).catch(err => {
                     const error = {order: order['ORDER'].NUMBER, filename: file, status: err.statusCode, response: err.message};
                     errorController.error_create(error).then( () => {moveFile(folder + file, folder + '/errors/', file)});
                 })
             })
             .catch(err => {
-                //res.json({'status': 'error', 'message': error.message, 'id': ''});
                 const error = {order: order['ORDER'].NUMBER, filename: file, status: err.statusCode, response: err.message};
                 errorController.error_create(error).then( () => {moveFile(folder + file, folder + '/errors/', file)});
             });

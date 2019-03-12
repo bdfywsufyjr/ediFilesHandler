@@ -39,7 +39,7 @@ html
 
     <!-- Navbar-->
 
-    nav(class='navbar navbar-expand-sm bg-dark navbar-dark container')
+    nav(class='navbar navbar-expand-sm bg-dark navbar-dark container-fluid')
       a(class='navbar-brand' href=domain)
         img(src= domain + 'images/logo.jpg' alt='Logo' style='width:100px;')
       ul(class='navbar-nav')
@@ -59,16 +59,16 @@ html
     <!-- App content-->
 
     main(class='app-content')
-      div(class='container')
+      div(class='container-fluid')
         div(class="row")
-          div(class="col")
+          div(class="col-sm")
 
             block content
-
 
             script.
                 $(document).ready(function () {
                     $('#pickle').DataTable({
+                        responsive: true,
                         order: [[ 3, 'desc' ], [ 1, 'desc' ]],
                         "lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "Все"]],
                         "language": {
