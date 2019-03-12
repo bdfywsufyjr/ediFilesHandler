@@ -9,6 +9,8 @@ var CustomerSchema = new Schema(
         login: { type: String, required: true },
         password: { type: String, required: true },
         gln: { type: String, required: true, max: 13 },
+        esd: { type: Boolean, required: true },
+        apiKey: { type: String, required: false },
         shipTo: [
             {
                 jdeId: { type: String, required: false, max: 7 },

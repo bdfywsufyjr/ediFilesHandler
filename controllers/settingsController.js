@@ -55,6 +55,8 @@ exports.globalSettings_create_post = function(req, res, next) {
             login: req.body.login,
             password: req.body.password,
             mode: req.body.mode,
+            apiUrl: req.body.apiUrl,
+            esdUrl: req.body.esdUrl,
             email: req.body.email,
         }
     );
@@ -101,6 +103,8 @@ exports.globalSettings_update_post = function(req, res) {
             login:      req.body.login,
             password:   req.body.password,
             mode:       req.body.mode,
+            apiUrl:     req.body.apiUrl,
+            esdUrl:     req.body.esdUrl,
             email:      req.body.email,
             _id:        req.params.id //This is required, or a new ID will be assigned!
         });
@@ -133,5 +137,6 @@ exports.globalSettings_delete_get = function(req, res) {
         return res.json({'status': '200', 'response': response});
     });
 };
+
 
 

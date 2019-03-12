@@ -48,7 +48,7 @@ module.exports = jdeDate = (ediDate) => {
     var myDate = new Date(ediDate);
     var start = new Date(myDate.getFullYear(), 0, 0);
     var diff = (myDate - start) + ((start.getTimezoneOffset() - myDate.getTimezoneOffset()) * 60 * 1000);
-    var dayInYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+    var dayInYear = Math.floor(diff / (1000 * 60 * 60 * 24)).toLocaleString('en', {minimumIntegerDigits:3,minimumFractionDigits:0,useGrouping:false});;
     var orderDate = '1'+ myDate.getFullYear().toString().substr(-2) + dayInYear;
 
     return orderDate;
@@ -64,6 +64,13 @@ module.exports = moveFile = (file, dir2, newName) => {
         else console.log('Successfully moved');
     });
 };
+
+module.exports = distinctByProp = (theArray, prop) => {
+    let tempArray = [];
+    let isFound = obj => tempArray.find( n => n[prop] === obj[prop]);
+    theArray.forEach( current => !isFound(current) && tempArray.push(current));
+    return tempArray;
+}
 
 
 

@@ -3,6 +3,7 @@ var router                      = express.Router();
 
 // Require controller modules.
 var settings_controller         = require('../controllers/settingsController');
+var esd_controller              = require('../controllers/esdController');
 var customer_controller         = require('../controllers/customerController');
 var order_controller            = require('../controllers/orderController');
 var error_controller            = require('../controllers/errorController');
@@ -42,6 +43,17 @@ router.post('/settings/:id/update', settings_controller.globalSettings_update_po
 
 // GET request to delete global settings.
 router.get('/settings/:id/delete', settings_controller.globalSettings_delete_get);
+
+/// ESD SETTINGS ROUTES ///
+
+// GET ESD settings home page.
+router.get('/settings/esd', esd_controller.index);
+
+// GET list of ESD products.
+router.get('/settings/esd/list', esd_controller.esd_list);
+
+// POST request for creating Customer.
+router.post('/settings/esd', esd_controller.esd_create_post);
 
 /// ORDER ROUTES ///
 

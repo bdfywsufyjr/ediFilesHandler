@@ -1,0 +1,132 @@
+extends layout
+
+block content
+
+    h3=title
+
+    p
+
+    <!-- Data table-->
+
+    form(method='POST' action='')
+        input#id.form-control(type='hidden', name='id', value=(undefined === products ? '' : products))
+
+        table#pick.display
+            thead
+                tr
+                    th(width='25%') Product Id
+                    th(width='65%') Наименование
+                    th(width='10%')
+
+        table#newRow.display(style='display:none')
+            tbody
+                tr
+                    td
+                        input.form-control(type='text' id='sTid' name='sTid')
+                    td
+                        input.form-control(type='text' id='sTname' name='sTname')
+                    td(class='dt-center')
+                        i.fa.fa-minus-square.fa-lg(aria-hidden='true')
+
+        p
+        button.btn.btn-primary(type='submit') Подтвердить
+
+        script.
+            $(document).ready(function () {
+
+                var table;
+
+                $("#pick").on("mousedown", "td .fa.fa-minus-square", function (e) {
+                    table.row($(this).closest("tr")).remove().draw();
+                })
+
+                $('#pick').css('border-bottom', 'none');
+
+                table = $('#pick').DataTable({
+                    paging: false,
+                    ordering: false,
+                    searching: false,
+                    serverSide: false,
+                    info: false,
+                    dom: 'Bfrtip',
+                    buttons: [
+                        {
+                            text: 'Добавить',
+                            action: function () {
+                                var rowHtml = $("#newRow").find("tr")[0].outerHTML
+                                console.log(rowHtml);
+                                table.row.add($(rowHtml)).draw();
+                            }
+                        }
+                    ]
+                });
+
+                table.buttons().container()
+                    .insertBefore('#pick');
+
+                if (document.getElementById('id').value) {
+
+                    table.destroy();
+
+                    var url = '/data/settings/esd/list';
+
+                    table = $('#pick').DataTable({
+                        paging: false,
+                        ordering: false,
+                        searching: false,
+                        serverSide: false,
+                        info: false,
+                        dom: 'Bfrtip',
+                        buttons: [
+                            {
+                                text: 'Добавить',
+                                action: function () {
+                                    var rowHtml = $("#newRow").find("tr")[0].outerHTML
+                                    console.log(rowHtml);
+                                    table.row.add($(rowHtml)).draw();
+                                }
+                            }
+                        ],
+                        ajax: {
+                            url: url,
+                            dataSrc: 'data'
+                        },
+                        columns: [
+                            {
+                                'render': function (data, type, row) {
+                                    return '<input class="form-control" id="sTid" name="sTid" type="text" value="' + (undefined === row['id'] ? '' : row['id']) + '">';
+                                },
+                                'width': '25%',
+                                'targets': 0
+                            },
+                            {
+                                'render': function (data, type, row) {
+                                    return '<input class="form-control" id="sTname" name="sTname" type="text" value="' + (undefined === row['name'] ? '' : row['name']) + '">';
+                                },
+                                'width': '65%',
+                                'targets': 1
+                            },
+                            {
+                                'defaultContent': '<i class="fa fa-minus-square fa-lg" aria-hidden="true"></i>',
+                                'className': 'dt-center',
+                                'width': '10%',
+                                'targets': 3
+                            }
+                        ]
+                    });
+                }
+
+                $('#addRow').on('click', function () {
+                    var rowHtml = $("#newRow").find("tr")[0].outerHTML
+                    console.log(rowHtml);
+                    table.row.add($(rowHtml)).draw();
+                });
+
+            });
+
+        if errors
+            ul
+                for error in errors
+                    li!= error.msg
+
+

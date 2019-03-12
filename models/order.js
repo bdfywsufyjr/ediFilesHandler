@@ -5,6 +5,7 @@ var Schema = mongoose.Schema;
 var OrderSchema = new Schema(
     {
         orderId:    { type: String, required: true },
+        type:       { type: String, enum: ['general', 'esd'], default: 'general'},
         holdCode:   { type: String },
         soldTo:     { type: Schema.Types.ObjectId, ref: 'Customer', required: true },
         //shipTo: { type: Schema.Types.ObjectId, ref: 'ShipTo', required: true },

@@ -12,6 +12,7 @@ var helper                      = require('../helper');
 var customerController          = require('../controllers/customerController');
 var settingsController          = require('../controllers/settingsController');
 var errorController             = require('../controllers/errorController');
+var esdController               = require('../controllers/esdController');
 
 /**
  *
@@ -42,108 +43,110 @@ async function findFileByOrderNumber(orderNumber){
     return content;
 }
 
-async function getDataForOrderRequest(req) {
+async function getDataForOrderRequest(params) {
 
-    let order = await findFileByOrderNumber(req.params.id);
-    let data = await customerController.getCustomerSettings(order['ORDER']['HEAD'][0]['BUYER']);
-    let settings = await settingsController.getGlobalSettingsWithPromise();
-    let folder = settings.folder;
-    let file = order['FILENAME'];
+    const order = params.order;
 
-    if (!data) {
-        let error = {order: order['ORDER'].NUMBER, filename: file, status: 'undefined', response: 'Customer doesnt exists'};
-        errorController.error_create(error).then( () => {moveFile(folder + file, folder + '/errors/', file)});
+    return new Promise( async (resolve, reject) => {
+        const customerData = await customerController.getCustomerSettings(order['ORDER']['HEAD'][0]['BUYER']);
 
-        return
-    }
+        if (!customerData) {
+            reject({request: null, type: null, order: order, customer: '', message: 'Customer does not exists'})
+        }
 
-    var options = {
-        url: 'https://kiev.elkogroup.com/api/Sales/CreateOrder?username=' + data.login + '&password=' + data.password,
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        resolveWithFullResponse: true,
-        body: '',
-        json: true
-    };
+        const initialOrderLines = order['ORDER']['HEAD'][0]['POSITION'];
+        const esdItems = await esdController.getEsdSettings();
 
-    var shipTo;
-    var orderLines = [];
+        let esdOrderLines = initialOrderLines.filter(o1 => esdItems.find(o2 => parseInt(o1.PRODUCTIDSUPPLIER[0]) == o2.id));
 
-    data.shipTo.forEach(function (item) {
-        if (item.gln == order['ORDER']['HEAD'][0]['DELIVERYPLACE'][0]) {
-            shipTo = item.jdeId;
+        if (esdOrderLines.length > 0 && initialOrderLines.length != esdOrderLines.length) {
+            reject({request: null, type: null, order: order, customer: '', message: 'Mixed orders are not allowed'});
+        }
+
+        let options = {
+            url: '',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            resolveWithFullResponse: true,
+            body: '',
+            json: true
+        };
+
+        const orderLines = initialOrderLines.map(orderLine => {
+            return {
+                "productId": parseInt(orderLine.PRODUCTIDSUPPLIER[0]),
+                "quantity": parseInt(orderLine.ORDEREDQUANTITY[0]),
+                "price": parseFloat(orderLine.PRICEWITHVAT[0]),
+                "customerProductId": parseInt(orderLine.PRODUCTIDBUYER[0])
+            }
+        });
+
+        if (customerData.esd && esdOrderLines.length > 0) {
+            options.url = params.settings.esdUrl + '?';
+            options.headers['Authorization'] = 'APIKey ' + customerData.apiKey;
+            options.body = {
+                "orderLines": orderLines,
+                "comment": "Номер заказа: " + order['ORDER'].NUMBER,
+                "email": "sample string 2",
+                "version": "testandignoreholds",
+                "maxCharsPerLineForReceipt": 100
+            };
+
+            resolve({request: options, type: 'esd', order: order, customer: customerData, message: ''});
+        }
+
+        if (esdOrderLines.length === 0) {
+            const shipTo = customerData.shipTo.map( item => item.gln == order['ORDER']['HEAD'][0]['DELIVERYPLACE'][0] ? item.jdeId : undefined);
+            options.url = params.settings.apiUrl + '?';
+            options.qs = {
+                username: customerData.login,
+                password: customerData.password
+            }
+            options.body = {
+                "deliveryAddress": parseInt(shipTo), "requestedDeliveryDate": parseInt(jdeDate(order['ORDER'].DATE)),
+                "orderIfAllAvailable": false, "deliveryInstructions": "Номер заказа: " + order['ORDER'].NUMBER,
+                "customerPO": order['ORDER'].NUMBER[0], "orderLines": orderLines
+            };
+
+            resolve({request: options, type: 'general', order: order, customer: customerData, message: ''});
         }
     });
-
-    order['ORDER']['HEAD'][0]['POSITION'].forEach(function (orderLine) {
-        var jsonOrderLine = {
-            "productId": parseInt(orderLine.PRODUCTIDSUPPLIER[0]), "quantity": parseInt(orderLine.ORDEREDQUANTITY[0]),
-            "price": parseFloat(orderLine.PRICEWITHVAT[0]), "customerProductId": parseInt(orderLine.PRODUCTIDBUYER[0])
-        };
-        orderLines.push(jsonOrderLine);
-    });
-
-    var json = {
-        "deliveryAddress": parseInt(shipTo), "requestedDeliveryDate": parseInt(jdeDate(order['ORDER'].DATE)),
-        "orderIfAllAvailable": false, "deliveryInstructions": "Номер заказа: " + order['ORDER'].NUMBER,
-        "customerPO": order['ORDER'].NUMBER[0], "orderLines": orderLines
-    };
-
-    options.body = json;
-
-    return {request: options, order: order, customer: data};
 }
 
 // JDE order request to ELKO
-async function createOrderPostRequest(req, callback) {
+async function createOrderPostRequest(options) {
 
-    let options = await getDataForOrderRequest(req);
+    return new Promise( (resolve, reject) => {
+        rp(options.request)
+            .then(result => {
 
-    // API request for order
-    rp(options.request)
-        .then( (result) => {
+                // Save new order
+                var newOrder = new Order(
+                    {
+                        orderId: result.body.orderId, holdCode: result.body.holdCode, soldTo: options.customer._id,
+                        shipTo: options.request.body.deliveryAddress, comments: result.body.comments,
+                        shipDate: result.body.shipDate, success: true, orderDetails: result.body.orderDetails,
+                        ediOrder: options.order['ORDER'].NUMBER, fileName: options.order['FILENAME'],
+                    }
+                );
 
-            // Save new order
-            var newOrder = new Order(
-                {
-                    orderId: result.body.orderId, holdCode: result.body.holdCode, soldTo: options.customer._id,
-                    shipTo: options.request.body.deliveryAddress, comments: result.body.comments,
-                    shipDate: result.body.shipDate, success: true, orderDetails: result.body.orderDetails,
-                    ediOrder: options.order['ORDER'].NUMBER, fileName: options.order['FILENAME'],
-                }
-            );
-
-            Order.findOne( { 'orderId': result.body.orderId } )
-                .exec( function (foundOrder) {
-
-                    if (foundOrder) {
-
-                        callback(null, foundOrder);
+                newOrder.save( (err, savedOrder) => {
+                    if (err) {
+                        reject(err);
                     } else {
-                        newOrder.save( function (err, savedOrder) {
-                            if (err) {
-                                callback(err);
-                            } else {
-                                callback(null, savedOrder);
-                            }
-                        });
+                        resolve(savedOrder);
                     }
                 });
-        })
-        .catch(errors.StatusCodeError, function (reason) {
-            console.log('The server responded with a status codes other than 2xx.');
-            console.log('Error: ' + reason);
-            callback(reason);
-            // The server responded with a status codes other than 2xx.
-        })
-        .catch(errors.RequestError, function (reason) {
-            console.log('The request failed due to technical reasons.');
-            console.log('Error: ' + reason);
-            callback(reason);
-            // The request failed due to technical reasons.
-        });
+            })
+            .catch(error => {
+                console.log('The server responded with a status codes other than 2xx.');
+                console.log('Error: ' + error);
+                reject({request: '', type: '', order: options.order, customer: '', message: error.message});
+            });
+    });
 }
 
 /**
@@ -174,16 +177,22 @@ exports.autoModeProcess = async () => {
     }
 
     matchedOrders.forEach(function (order) {
-        var req = {'params': {'id': order['ORDER'].NUMBER}};
-        createOrderPostRequest(req, async function (err, result) {
-            let file = order['FILENAME'];
-            if (err) {
-                let error = {order: order['ORDER'].NUMBER, filename: file, status: err.statusCode, response: err.message};
+        const file = order['FILENAME'];
+        Promise.resolve(getDataForOrderRequest({order: order, settings: settings}))
+            .then(request => {
+                Promise.resolve(createOrderPostRequest(request))
+                    .then(result => {
+                        moveFile(folder + result.fileName, folder + '/archive/', 'SP_' + result.orderId + '.xml');
+                    }).catch(err => {
+                    const error = {order: order['ORDER'].NUMBER, filename: file, status: err.statusCode, response: err.message};
+                    errorController.error_create(error).then( () => {moveFile(folder + file, folder + '/errors/', file)});
+                })
+            })
+            .catch(err => {
+                const error = {order: order['ORDER'].NUMBER, filename: file, status: err.statusCode, response: err.message};
                 errorController.error_create(error).then( () => {moveFile(folder + file, folder + '/errors/', file)});
-            } else {
-                moveFile(folder + file, folder + '/archive/', 'SP_' + result.orderId + '.xml');
-            }
-        }).catch((err) => {console.log('err: ' + err)});;
+            });
+
     });
 }
 
@@ -194,33 +203,38 @@ exports.autoModeProcess = async () => {
 // Index page
 exports.index = async function (req, res) {
 
-    var orders = await readSourceFolder('new');
+    const orders = await readSourceFolder('new');
+    const esdItems = await esdController.getEsdSettings();
 
-    var buyers = orders.reduce( function (r, o) {
+    let buyers = orders.reduce( function (r, o) {
         r.push(o['ORDER']['HEAD'][0]['BUYER']);
 
         return r;
     }, []);
 
-    customerController.getCustomersSettings(buyers, function (rest) {
+    customerController.getCustomersSettings(buyers, rest => {
 
-        var result = orders.reduce(function (r, o1) {
-            var f = rest.find(function (o2) {
+        let result = orders.reduce((r, o1) => {
+            let f = rest.find(o2 => {
 
                 return o1['ORDER']['HEAD'][0]['BUYER'] == o2.gln
             });
 
-            var address = 'undefined';
+            const orderLines = o1['ORDER']['HEAD'][0]['POSITION'];
+            const esdOrderLines = orderLines.filter(o1 => esdItems.find(o2 => parseInt(o1.PRODUCTIDSUPPLIER[0]) == o2.id));
+            const type = esdOrderLines.length > 0 ? 'esd' : 'stock';
+
+            let address = 'undefined';
 
             if (f) {
-                f.shipTo.forEach(function (shipTo) {
+                f.shipTo.forEach(shipTo => {
                     if (shipTo.gln == o1['ORDER']['HEAD'][0]['DELIVERYPLACE'][0]) {
                         address = shipTo.address;
                     }
                 });
             }
 
-            r.push(f ? Object.assign(o1, {"CUSTOMER": f.name}, {"SHIPTO": address}) : Object.assign(o1, {"CUSTOMER": 'undefined'}, {"SHIPTO": address}));
+            r.push(f ? Object.assign(o1, {"CUSTOMER": f.name}, {"SHIPTO": address}, {"type": type}) : Object.assign(o1, {"CUSTOMER": 'undefined'}, {"SHIPTO": address}, {"type": type}));
 
             return r;
         }, []);
@@ -302,21 +316,23 @@ exports.archive_file_detail = function(req, res) {
 };
 
 // Order create GET.
-exports.order_create_get = async function(req, res) {
+exports.order_create_get = async function (req, res) {
+    const order = await findFileByOrderNumber(req.params.id);
+    const settings = await settingsController.getGlobalSettingsWithPromise();
+    const folder = settings.folder;
 
-    let settings = await settingsController.getGlobalSettingsWithPromise();
-    let folder = settings.folder;
+    Promise.resolve(getDataForOrderRequest({order: order, settings: settings}))
+        .then(request => {
+            Promise.resolve(createOrderPostRequest(request))
+                .then(result => {
+                    moveFile(folder + result.fileName, folder + '/archive/', 'SP_' + result.orderId + '.xml');
 
-    createOrderPostRequest(req, function (err, result) {
-        if (err) {
-            // Something bad happened
-            res.json({'status': 'error', 'message': err.message, 'id': ''});
-
-            return;
-        }
-
-        moveFile(folder + result.fileName, folder + '/archive/', 'SP_' + result.orderId + '.xml');
-
-        res.json({'status': 'success', 'message': '', 'id': result._id});
-    });
+                    res.json({'status': 'success', 'message': '', 'id': result._id});
+                }).catch(error => {
+                    res.json({'status': 'error', 'message': error, 'id': ''})
+            })
+        })
+        .catch(error => {
+            res.json({'status': 'error', 'message': error.message, 'id': ''});
+        });
 };
